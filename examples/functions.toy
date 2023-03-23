@@ -1,0 +1,7 @@
+fun addOne(number)
+	return number + 1
+end
+
+
+let two = addOne(2)
+print('The result was: ' + two)

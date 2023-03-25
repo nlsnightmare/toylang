@@ -1,9 +1,10 @@
 mod boolean_comparisons;
 mod builtin;
 mod math_operations;
+mod scope;
 mod value;
 
-use std::collections::HashMap;
+use std::collections::VecDeque;
 
 use crate::parser::{Expression, AST};
 
@@ -11,20 +12,21 @@ use self::{
     boolean_comparisons::BooleanComparisons,
     builtin::{execute_builtin, is_builtin},
     math_operations::MathOperations,
+    scope::Scope,
     value::Value,
 };
 
 #[derive(Debug)]
 pub struct Runtime {
-    variables: HashMap<String, Value>,
-    functions: HashMap<String, Value>,
+    global_scope: Scope,
+    local_scope: VecDeque<Scope>,
 }
 
 impl Runtime {
     pub fn new() -> Runtime {
         Runtime {
-            variables: HashMap::new(),
-            functions: HashMap::new(),
+            global_scope: Scope::default(),
+            local_scope: VecDeque::default(),
         }
     }
 
@@ -42,34 +44,54 @@ impl Runtime {
         last_value
     }
 
+    fn try_get_variable(&self, name: &str) -> Option<Value> {
+        self.global_scope
+            .get(name)
+            .or_else(|| self.local_scope.get(0)?.get(name))
+            .map(|v| v.clone())
+    }
+
+    fn get_variable(&self, name: &str) -> Value {
+        self.try_get_variable(name)
+            .expect(&format!("Undefined variable '{}'!", name))
+    }
+
+    fn set_variable(&mut self, name: &str, value: &Value) {
+        let value = value.clone();
+        let name = name.to_owned();
+
+        if let Some(mut s) = self.local_scope.pop_front() {
+            s.set(name, value);
+
+            self.local_scope.push_front(s);
+            return;
+        }
+
+        self.global_scope.set(name, value);
+    }
+
     fn execute(&mut self, expr: Expression) -> Value {
         match expr {
-            Expression::Variable(name) => {
-                if let Some(value) = self.variables.get(&name) {
-                    value.clone()
-                } else {
-                    panic!("undefined variable name {:?}", name);
-                }
-            }
+            Expression::Variable(name) => self.get_variable(&name),
 
             Expression::VariableDecleration { name, value } => {
                 let value = self.execute(*value);
-                self.variables.insert(name, value.clone());
+
+                self.set_variable(&name, &value);
 
                 value
             }
 
             Expression::VariableAssignment { name, value } => {
-                match self.variables.get(&name) {
-                    Some(_) => {
-                        let value = self.execute(*value);
-                        self.variables.insert(name, value);
+                let value = self.execute(*value);
 
-                        Value::Void
-                    }
-                    None => panic!("unknown variable {}", name),
-                };
-                Value::Void
+                if self.try_get_variable(&name).is_none() {
+                    panic!("Undefined variable {}", name);
+                }
+
+                self.set_variable(&name, &value);
+
+                value
             }
 
             Expression::Addition { .. }
@@ -88,11 +110,12 @@ impl Runtime {
 
             Expression::IfCondition { condition, body } => {
                 if self.execute(*condition).is_truthy() {
-                    self.run(body.clone());
+                    self.run(body.clone())
+                } else {
+                    Value::Void
                 }
-
-                Value::Void
             }
+
             Expression::WhileLoop { condition, body } => {
                 while self.execute(*condition.clone()).is_truthy() {
                     self.run(body.clone());
@@ -107,8 +130,8 @@ impl Runtime {
             } => {
                 let value = Value::Function { body, arguments };
 
-                if name != "" {
-                    self.functions.insert(name, value.clone());
+                if !name.is_empty() {
+                    self.set_variable(&name, &value);
                 }
 
                 value
@@ -120,23 +143,22 @@ impl Runtime {
                     .collect::<Vec<Value>>();
 
                 if is_builtin(&name) {
-                    execute_builtin(&name, argument_values)
-                } else {
-                    let (body, arguments) =
-                        match (self.functions.get(&name), self.variables.get(&name)) {
-                            (Some(Value::Function { body, arguments }), _) => (body, arguments),
-                            (None, Some(Value::Function { body, arguments })) => (body, arguments),
-                            _ => panic!("undefined function {}", name),
-                        };
+                    return execute_builtin(&name, argument_values);
+                }
 
-                    // FIXME: there must be a better way to create  a new scope than this lmao
-                    let mut runtime = Runtime::new();
-                    runtime.functions = self.functions.clone();
-                    for (argument, value) in arguments.iter().zip(argument_values) {
-                        runtime.variables.insert(argument.to_owned(), value);
+                if let Value::Function { body, arguments } = self.get_variable(&name) {
+                    let mut scope = Scope::default();
+                    for (arg, value) in arguments.iter().zip(argument_values) {
+                        scope.set(arg.clone(), value);
                     }
 
-                    runtime.run(body.clone())
+                    self.local_scope.push_front(scope);
+                    let value = self.run(body.clone());
+                    self.local_scope.pop_front();
+
+                    value
+                } else {
+                    panic!("undefined function name {:?}", name);
                 }
             }
             _ => todo!("no idea what to do with {:?}", expr),

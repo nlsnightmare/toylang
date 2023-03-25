@@ -1,0 +1,11 @@
+let a = 1
+let b = 0
+
+while b < 3
+	print('a is: ' + a)
+	let c = 2
+	b = b + 1
+
+end
+
+print('c is still defined though ' + c)

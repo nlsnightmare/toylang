@@ -24,6 +24,10 @@ impl MathOperations for Runtime {
             (Value::String(a), Value::Number(b), Addition { .. }) => {
                 Value::String(format!("{}{}", a, b))
             }
+            (Value::Number(a), Value::String(b), Addition { .. }) => {
+                Value::String(format!("{}{}", a, b))
+            }
+
             (a, b, Addition { .. }) => panic!("TypeError: unable to add {:?} and {:?}", &a, &b),
 
             (Value::Number(a), Value::Number(b), Subtraction { .. }) => Value::Number(a - b),

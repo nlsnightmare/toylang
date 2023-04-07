@@ -62,21 +62,25 @@ impl Parser {
             Token::Keyword(Keyword::Let) => self.parse_variable_decleration(),
             Token::Keyword(Keyword::Fun) => self.parse_function_decleration(),
             Token::Keyword(Keyword::While) => self.parse_while_loop(),
-            Token::BooleanLiteral(v) => {
+            Token::BooleanLiteral(_) | Token::StringLiteral(_) | Token::NumberLiteral(_) => {
                 self.consume();
-                Ok(Expression::Bool(v))
+                Ok(token.value())
             }
-            Token::StringLiteral(s) => {
-                self.consume();
-                Ok(Expression::String(s))
-            }
-            Token::NumberLiteral(s) => {
-                self.consume();
-                Ok(Expression::Number(s))
-            }
+            Token::OpenBracket => self.parse_array(),
             Token::Identifier(name) => match self.peek() {
+                // TODO: implement fields
                 Some(Token::Equals) => self.parse_variable_assignment(),
                 Some(Token::OpenParens) => self.parse_function_call(),
+                Some(Token::OpenBracket) => {
+                    self.consume(); // The identifier
+                    self.try_consume(Token::OpenBracket)?;
+                    let index = self.parse_expression()?;
+                    self.try_consume(Token::CloseBracket)?;
+                    Ok(Expression::ArrayIndexing {
+                        array: Box::new(Expression::Variable(name.to_owned())),
+                        index: Box::new(index),
+                    })
+                }
                 _ => {
                     self.consume();
 
@@ -198,7 +202,11 @@ impl Parser {
 
         self.try_consume(Token::Keyword(Keyword::End))?;
 
-        Ok(Expression::FunctionDefinition { name, body, arguments })
+        Ok(Expression::FunctionDefinition {
+            name,
+            body,
+            arguments,
+        })
     }
 
     fn parse_function_call(&mut self) -> ParseResult<Expression> {
@@ -267,6 +275,28 @@ impl Parser {
             left: Box::new(left),
             right: Box::new(right),
         })
+    }
+
+    fn parse_array(&mut self) -> ParseResult<Expression> {
+        self.try_consume(Token::OpenBracket)?;
+
+        let mut items = vec![];
+
+        loop {
+            match self.current_token() {
+                Ok(Token::CloseBracket) => break,
+                Ok(Token::Comma) => self.try_consume(Token::Comma)?, // no trailing commas for now
+                _ => {}
+            };
+
+            let expr = self.parse_expression()?;
+
+            items.push(Box::new(expr));
+        }
+
+        self.try_consume(Token::CloseBracket)?;
+
+        Ok(Expression::Array(items))
     }
 
     fn parse_variable_assignment(&mut self) -> ParseResult<Expression> {
@@ -371,6 +401,7 @@ mod test {
             Expression::FunctionDefinition {
                 name: "some_function".to_owned(),
                 body: Vec::new(),
+                arguments: Vec::new(),
             }
         )
     }

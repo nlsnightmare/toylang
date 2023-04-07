@@ -1,3 +1,5 @@
+use crate::parser::Expression;
+
 #[derive(Debug)]
 pub struct TokenWrapper {
     pub token: Token,
@@ -44,6 +46,8 @@ pub enum Token {
     NumberLiteral(f64),
     StringLiteral(String),
     BooleanLiteral(bool),
+    OpenBracket,
+    CloseBracket,
     Plus,
     Minus,
     Star,
@@ -58,12 +62,14 @@ pub enum Token {
     Gte,
     Gt,
     Lt,
+    Dot,
 }
 
 impl Token {
     pub fn symbols<'a>() -> Vec<&'a str> {
         vec![
             "==", ">=", "<=", "<", ">", "=", "+", "-", "*", "/", "(", ")", ",",
+            "[", "]",
         ]
     }
 
@@ -80,9 +86,21 @@ impl Token {
             "/" => Token::Slash,
             "(" => Token::OpenParens,
             ")" => Token::CloseParens,
+            "[" => Token::OpenBracket,
+            "]" => Token::CloseBracket,
             "=" => Token::Equals,
             "," => Token::Comma,
+            "." => Token::Dot,
             _ => unreachable!(),
+        }
+    }
+
+    pub fn value(self) -> Expression {
+        match self {
+            Token::NumberLiteral(v) => Expression::Number(v),
+            Token::BooleanLiteral(v) => Expression::Bool(v),
+            Token::StringLiteral(v) => Expression::String(v),
+            _ => panic!(""),
         }
     }
 }

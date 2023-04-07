@@ -31,6 +31,11 @@ pub enum Expression {
     Number(f64),
     Variable(String),
     Bool(bool),
+    Array(Vec<Box<Expression>>),
+    ArrayIndexing {
+        array: Box<Expression>,
+        index: Box<Expression>,
+    },
     Return(Box<Expression>),
     Addition {
         left: Box<Expression>,
@@ -60,5 +65,8 @@ pub enum Expression {
         left: Box<Expression>,
         right: Box<Expression>,
     },
-    Division { left: Box<Expression>, right: Box<Expression> },
+    Division {
+        left: Box<Expression>,
+        right: Box<Expression>,
+    },
 }

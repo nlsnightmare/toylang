@@ -7,6 +7,7 @@ pub enum Value {
     Number(f64),
     Void,
     Bool(bool),
+    Array { contents: Vec<Box<Value>>, length: usize },
 }
 
 impl Value {

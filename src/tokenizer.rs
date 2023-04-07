@@ -112,6 +112,7 @@ mod tests {
     use std::vec;
 
     use crate::*;
+    use super::Token;
 
     fn verify_tokens(contents: String, expected_tokens: Vec<Token>) {
         let tokens = Tokenizer::tokenize(contents.to_owned());

@@ -1,13 +1,18 @@
 use super::Value;
 
 pub fn is_builtin(name: &str) -> bool {
-    let bultitin = ["print", "add", "subtract", "print_version", "subtract"];
+    let bultitin = ["print", "add", "subtract", "print_version", "subtract", "len"];
 
     bultitin.contains(&name)
 }
 
 pub fn execute_builtin(name: &str, args: Vec<Value>) -> Value {
     match name {
+        "len" => match &args[0] {
+            Value::Array { ref length, .. } => Value::Number(*length as f64),
+            Value::String(ref s) => Value::Number(s.len() as f64),
+            a => panic!("object {:?} doen't have a length", a),
+        },
         "print" => {
             if let Some(v) = args.first() {
                 println!("{}", v.to_string());

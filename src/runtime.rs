@@ -107,6 +107,30 @@ impl Runtime {
             Expression::String(v) => Value::String(v),
             Expression::Bool(v) => Value::Bool(v),
             Expression::Number(v) => Value::Number(v),
+            Expression::ArrayIndexing { array, index } => {
+                let value = self.execute(*array);
+                let index = self.execute(*index);
+
+
+                match [&value, &index] {
+                    [Value::Array { contents, length }, Value::Number(i)] => {
+                        *contents[*i as usize].clone()
+                    }, 
+                    _ => panic!("something went wrong with indexing lol, {:#?}, {:?}", value, index),
+                }
+            }
+            Expression::Array(exprs) => {
+                let values = exprs
+                    .into_iter()
+                    .map(|expr| self.execute(*expr))
+                    .map(|v| Box::new(v))
+                    .collect::<Vec<_>>();
+
+                Value::Array {
+                    length: values.len(),
+                    contents: values,
+                }
+            }
 
             Expression::IfCondition { condition, body } => {
                 if self.execute(*condition).is_truthy() {

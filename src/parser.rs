@@ -1,7 +1,7 @@
 mod bool_expression;
 mod expression;
 
-use crate::tokenizer::token::*;
+use crate::lexer::token::*;
 use bool_expression::BoolExpressionParser;
 pub use expression::*;
 
@@ -334,14 +334,24 @@ impl Parser {
 
 #[cfg(test)]
 mod test {
-    use crate::{parser::Expression, tokenizer::*};
+    use crate::{
+        lexer::{Keyword, Token, TokenSpan, TokenWrapper},
+        parser::Expression,
+    };
 
     use super::Parser;
 
     fn wrap_tokens(tokens: Vec<Token>) -> Vec<TokenWrapper> {
         tokens
             .into_iter()
-            .map(|token| TokenWrapper { token, line: 0 })
+            .map(|token| TokenWrapper {
+                token,
+                span: TokenSpan {
+                    line: 0,
+                    start: 0,
+                    len: 10,
+                },
+            })
             .collect()
     }
 

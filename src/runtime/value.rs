@@ -26,7 +26,7 @@ impl Value {
             Value::Bool(false) => "false".to_owned(),
             Value::Number(i) => i.to_string(),
             Value::String(ref v) => v.clone(),
-            _ => panic!("Value {:?} cannot be converted to bool", &self),
+            _ => panic!("Value {:?} cannot be converted to string", &self),
         }
     }
 }

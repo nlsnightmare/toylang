@@ -1,12 +1,12 @@
 use std::path::Path;
 
-use parser::Parser;
-use runtime::Runtime;
-use tokenizer::Tokenizer;
-
+mod lexer;
 mod parser;
 mod runtime;
-mod tokenizer;
+
+use lexer::Lexer;
+use parser::Parser;
+use runtime::Runtime;
 
 fn main() {
     let argument = std::env::args().nth(1).expect("Please provide a filename");
@@ -20,7 +20,7 @@ fn main() {
         .expect("Unable to read file")
         .to_string();
 
-    let tokens = Tokenizer::tokenize(contents);
+    let tokens = Lexer::tokenize(contents);
     let ast = Parser::new(tokens)
         .parse()
         .expect("Unable to parse program!");

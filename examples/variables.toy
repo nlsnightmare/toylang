@@ -1,4 +1,4 @@
 # variables do not require type information
 let myVar = 1
 
-print('The value of myVar is: ' + myVar)
+print("The value of myVar is: " + myVar)

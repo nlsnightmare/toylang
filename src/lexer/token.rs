@@ -1,9 +1,28 @@
 use crate::parser::Expression;
 
+#[derive(Debug, Default)]
+pub struct TokenSpan {
+    pub line: usize,
+    pub start: usize,
+    pub len: usize,
+}
+
+impl TokenSpan {
+    pub fn new(line: usize, start: usize, len: usize) -> Self {
+        TokenSpan { line, start, len }
+    }
+}
+
 #[derive(Debug)]
 pub struct TokenWrapper {
     pub token: Token,
-    pub line: usize,
+    pub span: TokenSpan,
+}
+
+impl TokenWrapper {
+    pub fn len(&self) -> usize {
+        self.span.len
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -41,6 +60,7 @@ impl Keyword {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
+    Whitespace,
     Keyword(Keyword),
     Identifier(String),
     NumberLiteral(f64),
@@ -68,8 +88,7 @@ pub enum Token {
 impl Token {
     pub fn symbols<'a>() -> Vec<&'a str> {
         vec![
-            "==", ">=", "<=", "<", ">", "=", "+", "-", "*", "/", "(", ")", ",",
-            "[", "]",
+            "==", ">=", "<=", "<", ">", "=", "+", "-", "*", "/", "(", ")", ",", "[", "]",
         ]
     }
 

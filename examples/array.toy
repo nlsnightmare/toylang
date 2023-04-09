@@ -1,7 +1,8 @@
-let myArray = [1, 2, 3, 'hello']
+let myArray = [1, 2, 3, "hello", false]
 
+print("hello")
 let index = 0
 while index < len(myArray)
-	print(index + ' => ' + myArray[index])
+	print("myArray[" + index + "] = " + myArray[index])
 	index = index + 1
 end

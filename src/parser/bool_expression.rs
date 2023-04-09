@@ -1,4 +1,4 @@
-use crate::tokenizer::token::Token;
+use crate::lexer::token::Token;
 
 use super::{Expression, ParseResult, Parser};
 

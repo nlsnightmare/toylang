@@ -21,11 +21,11 @@ impl MathOperations for Runtime {
             (Value::String(a), Value::String(b), Addition { .. }) => {
                 Value::String(format!("{}{}", a, b))
             }
-            (Value::String(a), Value::Number(b), Addition { .. }) => {
-                Value::String(format!("{}{}", a, b))
+            (Value::String(a), b, Addition { .. }) => {
+                Value::String(format!("{}{}", a, b.to_string()))
             }
-            (Value::Number(a), Value::String(b), Addition { .. }) => {
-                Value::String(format!("{}{}", a, b))
+            (a, Value::String(b), Addition { .. }) => {
+                Value::String(format!("{}{}", a.to_string(), b))
             }
 
             (a, b, Addition { .. }) => panic!("TypeError: unable to add {:?} and {:?}", &a, &b),

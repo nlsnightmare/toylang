@@ -3,8 +3,8 @@ let globalA = 1
 fun someFunction()
 	let localA = 2
 
-	print('Global A is: ' + globalA)
-	print('Local A is: ' + localA)
+	print("Global A is: " + globalA)
+	print("Local A is: " + localA)
 
 	inner()
 end
@@ -12,7 +12,7 @@ end
 
 fun inner()
 	# will error: localA is not defined here!
-	print('localA is: ' + localA)
+	print("localA is: " + localA)
 end
 
 

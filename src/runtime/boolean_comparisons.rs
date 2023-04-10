@@ -12,28 +12,30 @@ impl BooleanComparisons for Runtime {
             Expression::GreaterThan { left, right }
             | Expression::GreaterEquals { left, right }
             | Expression::LessThan { left, right }
-            | Expression::LessEquals { left, right } => {
-                let left = self.execute(*left);
-                let right = self.execute(*right);
+            | Expression::LessEquals { left, right }
+            | Expression::Or { left, right }
+            | Expression::And { left, right } => {
+                let left = self.execute(*left).is_truthy();
+                let right = self.execute(*right).is_truthy();
+
                 (left, right)
             }
             _ => unreachable!(),
         };
 
-        match (left, right, &expr) {
-            (Value::Number(a), Value::Number(b), Expression::LessEquals { .. }) => {
-                Value::Bool(a <= b)
-            }
-            (Value::Number(a), Value::Number(b), Expression::LessThan { .. }) => Value::Bool(a < b),
+        let boolean_value = match expr {
+            Expression::LessEquals { .. } => left <= right,
+            Expression::LessThan { .. } => left < right,
 
-            (Value::Number(a), Value::Number(b), Expression::GreaterEquals { .. }) => {
-                Value::Bool(a >= b)
-            }
-            (Value::Number(a), Value::Number(b), Expression::GreaterThan { .. }) => {
-                Value::Bool(a > b)
-            }
+            Expression::GreaterEquals { .. } => left <= right,
+            Expression::GreaterThan { .. } => left < right,
 
-            (a, b, _) => panic!("TypeError: unable to compare {:?} and {:?}", &a, &b),
-        }
+            Expression::Or { .. } => left || right,
+            Expression::And { .. } => left && right,
+
+            _ => unreachable!("invalid boolean comparison with expression {:?}", expr),
+        };
+
+        return Value::Bool(boolean_value);
     }
 }

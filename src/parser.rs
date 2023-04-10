@@ -57,6 +57,13 @@ impl Parser {
         let token = self.current_token()?;
 
         let parsed = match token {
+            Token::Exclamation => {
+                self.consume();
+                let expr = self.parse_expression()?;
+
+                // This really needs to factor in operator precedence
+                Ok(Expression::BoolNegation(Box::new(expr)))
+            }
             Token::Keyword(Keyword::If) => self.parse_if_statement(),
             Token::Keyword(Keyword::Return) => self.parse_return_statement(),
             Token::Keyword(Keyword::Let) => self.parse_variable_decleration(),
@@ -76,6 +83,7 @@ impl Parser {
                     self.try_consume(Token::OpenBracket)?;
                     let index = self.parse_expression()?;
                     self.try_consume(Token::CloseBracket)?;
+
                     Ok(Expression::ArrayIndexing {
                         array: Box::new(Expression::Variable(name.to_owned())),
                         index: Box::new(index),
@@ -95,7 +103,7 @@ impl Parser {
             Ok(Token::Minus) => self.parse_subtraction(parsed),
             Ok(Token::Star) => self.parse_multiplication(parsed),
             Ok(Token::Slash) => self.parse_division(parsed),
-            Ok(Token::Lte | Token::Lt | Token::Gte | Token::Gt) => {
+            Ok(Token::Lte | Token::Lt | Token::Gte | Token::Gt | Token::And | Token::Or) => {
                 self.parse_boolean_expression(parsed)
             }
             _ => Ok(parsed),

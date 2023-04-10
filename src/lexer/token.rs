@@ -43,6 +43,7 @@ impl Keyword {
             "let", "if", "fun", "end", "while", "true", "false", "return",
         ]
     }
+
     pub fn from_string(string: &str) -> Keyword {
         match string {
             "let" => Keyword::Let,
@@ -83,12 +84,16 @@ pub enum Token {
     Gt,
     Lt,
     Dot,
+    And,
+    Or,
+    Exclamation,
 }
 
 impl Token {
     pub fn symbols<'a>() -> Vec<&'a str> {
         vec![
             "==", ">=", "<=", "<", ">", "=", "+", "-", "*", "/", "(", ")", ",", "[", "]",
+            "&&", "||", "!"
         ]
     }
 
@@ -110,6 +115,9 @@ impl Token {
             "=" => Token::Equals,
             "," => Token::Comma,
             "." => Token::Dot,
+            "&&" => Token::And,
+            "||" => Token::Or,
+            "!" => Token::Exclamation,
             _ => unreachable!(),
         }
     }

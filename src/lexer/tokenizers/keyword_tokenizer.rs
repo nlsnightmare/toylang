@@ -1,4 +1,4 @@
-use crate::lexer::{TokenSpan, Token, Keyword};
+use crate::lexer::{Keyword, Token, TokenSpan};
 
 use super::{Position, TokenWrapper, Tokenizer};
 

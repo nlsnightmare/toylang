@@ -69,4 +69,7 @@ pub enum Expression {
         left: Box<Expression>,
         right: Box<Expression>,
     },
+    Or { left: Box<Expression>, right: Box<Expression> },
+    And { left: Box<Expression>, right: Box<Expression> },
+    BoolNegation(Box<Expression>),
 }

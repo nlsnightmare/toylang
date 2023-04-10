@@ -99,10 +99,18 @@ impl Runtime {
             | Expression::Multiplication { .. }
             | Expression::Division { .. } => self.execute_math_operation(expr),
 
+            Expression::BoolNegation(v) => {
+                let v = self.execute(*v).is_truthy();
+
+                Value::Bool(!v)
+            }
+
             Expression::GreaterThan { .. }
             | Expression::GreaterEquals { .. }
             | Expression::LessThan { .. }
-            | Expression::LessEquals { .. } => self.execute_boolean_comparison(expr),
+            | Expression::LessEquals { .. }
+            | Expression::And { .. }
+            | Expression::Or { .. } => self.execute_boolean_comparison(expr),
 
             Expression::String(v) => Value::String(v),
             Expression::Bool(v) => Value::Bool(v),
@@ -111,12 +119,14 @@ impl Runtime {
                 let value = self.execute(*array);
                 let index = self.execute(*index);
 
-
                 match [&value, &index] {
                     [Value::Array { contents, length }, Value::Number(i)] => {
                         *contents[*i as usize].clone()
-                    }, 
-                    _ => panic!("something went wrong with indexing lol, {:#?}, {:?}", value, index),
+                    }
+                    _ => panic!(
+                        "something went wrong with indexing lol, {:#?}, {:?}",
+                        value, index
+                    ),
                 }
             }
             Expression::Array(exprs) => {

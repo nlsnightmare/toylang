@@ -1,0 +1,17 @@
+let a = true
+let b = false
+
+if a && b
+	print("Both a and b are true")
+end
+
+if a || b
+	print("either a or b is true")
+end
+
+if !a || b
+	print("a is false")
+end
+if !b
+	print("b is false")
+end

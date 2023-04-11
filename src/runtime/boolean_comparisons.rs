@@ -9,14 +9,14 @@ pub trait BooleanComparisons {
 impl BooleanComparisons for Runtime {
     fn execute_boolean_comparison(&mut self, expr: Expression) -> Value {
         let (left, right) = match expr.clone() {
-            Expression::GreaterThan { left, right }
-            | Expression::GreaterEquals { left, right }
-            | Expression::LessThan { left, right }
-            | Expression::LessEquals { left, right }
-            | Expression::Or { left, right }
-            | Expression::And { left, right } => {
-                let left = self.execute(*left);
-                let right = self.execute(*right);
+            Expression::GreaterThan(operation)
+            | Expression::GreaterEquals(operation)
+            | Expression::LessThan(operation)
+            | Expression::LessEquals(operation)
+            | Expression::Or(operation)
+            | Expression::And(operation) => {
+                let left = self.execute(*operation.left);
+                let right = self.execute(*operation.right);
 
                 (left, right)
             }
@@ -29,7 +29,6 @@ impl BooleanComparisons for Runtime {
 
             (Value::Number(a), Value::Number(b), Expression::GreaterEquals { .. }) => a >= b,
             (Value::Number(a), Value::Number(b), Expression::GreaterThan { .. }) => a > b,
-
 
             (a, b, Expression::Or { .. }) => a.is_truthy() || b.is_truthy(),
             (a, b, Expression::And { .. }) => a.is_truthy() && b.is_truthy(),

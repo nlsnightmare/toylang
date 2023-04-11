@@ -260,40 +260,28 @@ impl Parser {
         self.try_consume(Token::Plus)?;
         let right = self.parse_expression()?;
 
-        Ok(Expression::Addition {
-            left: Box::new(left),
-            right: Box::new(right),
-        })
+        Ok(Expression::Addition(BinaryExpression::new(left, right)))
     }
 
     fn parse_subtraction(&mut self, left: Expression) -> ParseResult<Expression> {
         self.try_consume(Token::Minus)?;
         let right = self.parse_expression()?;
 
-        Ok(Expression::Subtraction {
-            left: Box::new(left),
-            right: Box::new(right),
-        })
+        Ok(Expression::Subtraction(BinaryExpression::new(left, right)))
     }
 
     fn parse_multiplication(&mut self, left: Expression) -> ParseResult<Expression> {
         self.try_consume(Token::Star)?;
         let right = self.parse_expression()?;
 
-        Ok(Expression::Multiplication {
-            left: Box::new(left),
-            right: Box::new(right),
-        })
+        Ok(Expression::Multiplication(BinaryExpression::new(left, right)))
     }
 
     fn parse_division(&mut self, left: Expression) -> ParseResult<Expression> {
         self.try_consume(Token::Slash)?;
         let right = self.parse_expression()?;
 
-        Ok(Expression::Division {
-            left: Box::new(left),
-            right: Box::new(right),
-        })
+        Ok(Expression::Division(BinaryExpression::new(left, right)))
     }
 
     fn parse_array(&mut self) -> ParseResult<Expression> {

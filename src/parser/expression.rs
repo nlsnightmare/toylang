@@ -42,39 +42,30 @@ pub enum Expression {
         index: Box<Expression>,
     },
     Return(Box<Expression>),
-    Addition {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    Subtraction {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    Multiplication {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    LessEquals {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    LessThan {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    GreaterThan {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    GreaterEquals {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    Division {
-        left: Box<Expression>,
-        right: Box<Expression>,
-    },
-    Or { left: Box<Expression>, right: Box<Expression> },
-    And { left: Box<Expression>, right: Box<Expression> },
+    Addition(BinaryExpression),
+    Subtraction(BinaryExpression),
+    Multiplication(BinaryExpression),
+    LessEquals(BinaryExpression),
+    LessThan(BinaryExpression),
+    GreaterThan(BinaryExpression),
+    GreaterEquals(BinaryExpression),
+    Division(BinaryExpression),
+    Or(BinaryExpression),
+    And(BinaryExpression),
     BoolNegation(Box<Expression>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BinaryExpression {
+    pub left: Box<Expression>,
+    pub right: Box<Expression>,
+}
+
+impl BinaryExpression {
+    pub fn new(left: Expression, right: Expression) -> BinaryExpression {
+        Self {
+            left: Box::new(left),
+            right: Box::new(right),
+        }
+    }
 }

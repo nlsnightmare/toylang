@@ -4,7 +4,6 @@ mod lexer;
 mod tokenizers;
 
 pub use lexer::Lexer;
-use regex::Regex;
 pub use token::*;
 
 #[cfg(test)]

@@ -1,5 +1,3 @@
-use regex::Regex;
-
 use super::{
     tokenizers::{
         CharTokenizer, CommentTokenizer, IdentifierTokenizer, KeywordTokenizer, NumberTokenizer,

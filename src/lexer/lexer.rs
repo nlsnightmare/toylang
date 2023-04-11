@@ -1,9 +1,9 @@
 use super::{
     tokenizers::{
         CharTokenizer, CommentTokenizer, IdentifierTokenizer, KeywordTokenizer, NumberTokenizer,
-        StringTokenizer, WhitespaceTokenizer, Tokenizer,
+        StringTokenizer, Tokenizer, WhitespaceTokenizer,
     },
-    TokenWrapper, Token,
+    Token, TokenWrapper,
 };
 
 pub struct Lexer;
@@ -20,7 +20,6 @@ impl Position {
 }
 
 impl Lexer {
-
     pub fn tokenize(source_code: String) -> Vec<TokenWrapper> {
         let cloned = source_code.clone();
         let lines = cloned.split('\n');

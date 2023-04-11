@@ -13,7 +13,7 @@ use self::{
     builtin::{execute_builtin, is_builtin},
     math_operations::MathOperations,
     scope::Scope,
-    value::{ArrayValue, Value},
+    value::{ArrayValue, FunctionValue, Value},
 };
 
 #[derive(Debug)]
@@ -190,7 +190,7 @@ impl Runtime {
                 body,
                 arguments,
             } => {
-                let value = Value::Function { body, arguments };
+                let value = Value::Function(FunctionValue { body, arguments });
 
                 if !name.is_empty() {
                     self.set_variable(&name, value.clone());
@@ -208,7 +208,8 @@ impl Runtime {
                     return execute_builtin(&name, argument_values);
                 }
 
-                if let Value::Function { body, arguments } = self.get_variable(&name) {
+                if let Value::Function(FunctionValue { body, arguments }) = self.get_variable(&name)
+                {
                     let mut scope = Scope::default();
                     for (arg, value) in arguments.iter().zip(argument_values) {
                         scope.set(arg.clone(), value);

@@ -2,21 +2,24 @@ use crate::parser::AST;
 
 #[derive(Debug, Clone)]
 pub enum Value {
-    Function {
-        arguments: Vec<String>,
-        body: AST,
-    },
-    String(String),
-    Number(f64),
-    Void,
-    Bool(bool),
     Array(ArrayValue),
+    Bool(bool),
+    Function(FunctionValue),
+    Number(f64),
+    String(String),
+    Void,
 }
 
 #[derive(Clone, Debug)]
 pub struct ArrayValue {
     pub contents: Vec<Box<Value>>,
     pub length: usize,
+}
+
+#[derive(Clone, Debug)]
+pub struct FunctionValue {
+    pub arguments: Vec<String>,
+    pub body: AST,
 }
 
 impl Value {

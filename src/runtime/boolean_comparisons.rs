@@ -15,25 +15,26 @@ impl BooleanComparisons for Runtime {
             | Expression::LessEquals { left, right }
             | Expression::Or { left, right }
             | Expression::And { left, right } => {
-                let left = self.execute(*left).is_truthy();
-                let right = self.execute(*right).is_truthy();
+                let left = self.execute(*left);
+                let right = self.execute(*right);
 
                 (left, right)
             }
             _ => unreachable!(),
         };
 
-        let boolean_value = match expr {
-            Expression::LessEquals { .. } => left <= right,
-            Expression::LessThan { .. } => left < right,
+        let boolean_value = match (left, right, expr) {
+            (Value::Number(a), Value::Number(b), Expression::LessEquals { .. }) => a <= b,
+            (Value::Number(a), Value::Number(b), Expression::LessThan { .. }) => a < b,
 
-            Expression::GreaterEquals { .. } => left <= right,
-            Expression::GreaterThan { .. } => left < right,
+            (Value::Number(a), Value::Number(b), Expression::GreaterEquals { .. }) => a >= b,
+            (Value::Number(a), Value::Number(b), Expression::GreaterThan { .. }) => a > b,
 
-            Expression::Or { .. } => left || right,
-            Expression::And { .. } => left && right,
 
-            _ => unreachable!("invalid boolean comparison with expression {:?}", expr),
+            (a, b, Expression::Or { .. }) => a.is_truthy() || b.is_truthy(),
+            (a, b, Expression::And { .. }) => a.is_truthy() && b.is_truthy(),
+
+            (_, _, expr) => unreachable!("invalid boolean comparison with expression {:?}", expr),
         };
 
         return Value::Bool(boolean_value);

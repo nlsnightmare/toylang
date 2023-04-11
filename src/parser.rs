@@ -84,8 +84,19 @@ impl Parser {
                     let index = self.parse_expression()?;
                     self.try_consume(Token::CloseBracket)?;
 
+                    if let Ok(Token::Equals) = self.current_token() {
+                        self.try_consume(Token::Equals)?;
+                        let value = self.parse_expression()?;
+
+                        return Ok(Expression::ArrayAssignment {
+                            identifier: name.to_owned(),
+                            index: Box::new(index),
+                            value: Box::new(value),
+                        });
+                    }
+
                     Ok(Expression::ArrayIndexing {
-                        array: Box::new(Expression::Variable(name.to_owned())),
+                        identifier: Box::new(Expression::Variable(name.to_owned())),
                         index: Box::new(index),
                     })
                 }

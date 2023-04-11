@@ -1,6 +1,9 @@
 let myArray = [1, 2, 3, "hello", false]
 
-print("hello")
+myArray[0] = "this is a new value"
+
+print("the length of the array is " + len(myArray))
+
 let index = 0
 while index < len(myArray)
 	print("myArray[" + index + "] = " + myArray[index])

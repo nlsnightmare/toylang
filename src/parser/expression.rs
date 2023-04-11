@@ -32,8 +32,13 @@ pub enum Expression {
     Variable(String),
     Bool(bool),
     Array(Vec<Box<Expression>>),
+    ArrayAssignment {
+        identifier: String,
+        index: Box<Expression>,
+        value: Box<Expression>,
+    },
     ArrayIndexing {
-        array: Box<Expression>,
+        identifier: Box<Expression>,
         index: Box<Expression>,
     },
     Return(Box<Expression>),

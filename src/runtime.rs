@@ -13,7 +13,7 @@ use self::{
     builtin::{execute_builtin, is_builtin},
     math_operations::MathOperations,
     scope::Scope,
-    value::Value,
+    value::{ArrayValue, Value},
 };
 
 #[derive(Debug)]
@@ -51,12 +51,21 @@ impl Runtime {
             .map(|v| v.clone())
     }
 
+    fn mutate_variable<CB>(&mut self, name: &str, mutation_fn: CB)
+    where
+        CB: FnOnce(Value) -> Value,
+    {
+        let value = self.get_variable(name);
+        let result = mutation_fn(value);
+        self.set_variable(name, result);
+    }
+
     fn get_variable(&self, name: &str) -> Value {
         self.try_get_variable(name)
             .expect(&format!("Undefined variable '{}'!", name))
     }
 
-    fn set_variable(&mut self, name: &str, value: &Value) {
+    fn set_variable(&mut self, name: &str, value: Value) {
         let value = value.clone();
         let name = name.to_owned();
 
@@ -77,7 +86,7 @@ impl Runtime {
             Expression::VariableDecleration { name, value } => {
                 let value = self.execute(*value);
 
-                self.set_variable(&name, &value);
+                self.set_variable(&name, value.clone());
 
                 value
             }
@@ -89,7 +98,7 @@ impl Runtime {
                     panic!("Undefined variable {}", name);
                 }
 
-                self.set_variable(&name, &value);
+                self.set_variable(&name, value.clone());
 
                 value
             }
@@ -115,14 +124,33 @@ impl Runtime {
             Expression::String(v) => Value::String(v),
             Expression::Bool(v) => Value::Bool(v),
             Expression::Number(v) => Value::Number(v),
-            Expression::ArrayIndexing { array, index } => {
+            Expression::ArrayAssignment {
+                identifier,
+                index,
+                value,
+            } => {
+                let value = self.execute(*value);
+                let index = self.execute(*index);
+
+                self.mutate_variable(&identifier, |v| match (v, index) {
+                    (Value::Array(mut arr), Value::Number(i)) => {
+                        arr.contents[i as usize] = Box::new(value.clone());
+                        Value::Array(arr)
+                    }
+                    _ => panic!("{:?} is not an array!", identifier),
+                });
+
+                value
+            }
+            Expression::ArrayIndexing {
+                identifier: array,
+                index,
+            } => {
                 let value = self.execute(*array);
                 let index = self.execute(*index);
 
                 match [&value, &index] {
-                    [Value::Array { contents, length }, Value::Number(i)] => {
-                        *contents[*i as usize].clone()
-                    }
+                    [Value::Array(arr), Value::Number(i)] => *arr.contents[*i as usize].clone(),
                     _ => panic!(
                         "something went wrong with indexing lol, {:#?}, {:?}",
                         value, index
@@ -136,10 +164,10 @@ impl Runtime {
                     .map(|v| Box::new(v))
                     .collect::<Vec<_>>();
 
-                Value::Array {
+                Value::Array(ArrayValue {
                     length: values.len(),
                     contents: values,
-                }
+                })
             }
 
             Expression::IfCondition { condition, body } => {
@@ -165,7 +193,7 @@ impl Runtime {
                 let value = Value::Function { body, arguments };
 
                 if !name.is_empty() {
-                    self.set_variable(&name, &value);
+                    self.set_variable(&name, value.clone());
                 }
 
                 value
@@ -195,7 +223,7 @@ impl Runtime {
                     panic!("undefined function name {:?}", name);
                 }
             }
-            _ => todo!("no idea what to do with {:?}", expr),
+            Expression::Return(_) => unreachable!(),
         }
     }
 }

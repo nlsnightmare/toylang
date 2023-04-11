@@ -9,7 +9,7 @@ pub fn is_builtin(name: &str) -> bool {
 pub fn execute_builtin(name: &str, args: Vec<Value>) -> Value {
     match name {
         "len" => match &args[0] {
-            Value::Array { ref length, .. } => Value::Number(*length as f64),
+            Value::Array(a) => Value::Number(a.length as f64),
             Value::String(ref s) => Value::Number(s.len() as f64),
             a => panic!("object {:?} doen't have a length", a),
         },
